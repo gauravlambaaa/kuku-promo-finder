@@ -1,0 +1,11 @@
+# Kuku input pack is confidential - never commit it
+data/
+outputs/raw/
+submission/
+# working notes: quotes the scripts and describes plot details
+CLAUDE.md
+.cache/
+.env
+__pycache__/
+*.pyc
+.venv/

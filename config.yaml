@@ -1,0 +1,42 @@
+# LLM settings. Every provider below speaks the OpenAI chat-completions protocol,
+# so swapping models is a config change: set `provider` + `model`, and put that
+# provider's API key in .env (see .env.example).
+#
+# One-off overrides from the environment (these also switch off step_models):
+#   PROMO_PROVIDER=groq PROMO_MODEL=llama-3.3-70b-versatile
+#   PROMO_BASE_URL=https://my-gateway/v1 PROMO_API_KEY_ENV=MY_KEY
+llm:
+  provider: gemini
+  model: gemini-3.6-flash        # free tier, stable. Newer: gemini-3.8-flash. Higher limits: gemini-3.5-flash-lite
+  step_models: {}                # per-step overrides, e.g. {judge: gemini-3.5-flash-lite}
+  # Free-tier daily quotas are per model and small (~a dozen calls/day seen for 3.6-flash).
+  # When one runs out, the next model here takes over; finished calls stay cached.
+  fallback_models: [gemini-3.8-flash, gemini-3.5-flash-lite, gemini-3.1-flash-lite, gemini-2.5-flash-lite]
+  temperature: 0.2
+  json_mode: json_object         # json_object | json_schema | off (schema is always in the prompt too)
+  reasoning_effort: null         # low | medium | high, if the provider supports it; null = provider default
+  max_output_tokens: null
+  fix_attempts: 2                # self-correction rounds after an invalid reply
+  http_retries: 5                # retries on 429 / 5xx / network errors, with backoff
+  timeout_s: 300
+  rpm: 8                         # client-side throttle: keep at or below your free-tier requests/minute
+  concurrency: 4                 # parallel requests (per-episode steps); the rpm throttle still applies
+  use_cache: true
+  cache_dir: .cache/llm
+
+providers:
+  gemini:
+    base_url: https://generativelanguage.googleapis.com/v1beta/openai/
+    api_key_env: GEMINI_API_KEY
+  groq:
+    base_url: https://api.groq.com/openai/v1
+    api_key_env: GROQ_API_KEY
+  ollama:
+    base_url: http://localhost:11434/v1
+    api_key_env: null
+  openai:
+    base_url: https://api.openai.com/v1
+    api_key_env: OPENAI_API_KEY
+  openrouter:
+    base_url: https://openrouter.ai/api/v1
+    api_key_env: OPENROUTER_API_KEY
